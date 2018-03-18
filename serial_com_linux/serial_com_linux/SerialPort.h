@@ -40,16 +40,18 @@ private:
 	speed_t convertRate(int rate);
 
 public:
+	SerialPort() {}
 	SerialPort(string portName);
 	~SerialPort();
 
 	bool open(bool blocking);
 	void close();
 	void write(char *buffer, int numBytes);
-	char *read(int numBytes);
-	string read();
+	//char *read(int numBytes);
+	void read();
 
 	void setBaudRate(int rate);
 	void setParity(Parity parity);
 	void setDataBits(int dataBits);
+	void setFlowControl(bool on);
 };

@@ -13,9 +13,6 @@
  */
 SerialPort::SerialPort(string portName) {
 	this->portName = portName;
-	setBaudRate(19200);
-	setParity(none);
-	setDataBits(8);
 }
 /**
  * Unused deconstructor.
@@ -26,7 +23,7 @@ SerialPort::~SerialPort() {
 /**
  * Open the serial port and grab a file descriptor for read/write
  * operations.
- * @param blocking indicate whether to open a blocking line or not
+ * @param blocking indicate whether to block on reads or not
  * @return boolean indicating success or failure of open operation
  */
 bool SerialPort::open(bool blocking) {
@@ -61,31 +58,19 @@ void SerialPort::write(char *buffer, int numBytes) {
 		cerr << "Failed to write the buffer to the port.\n";
 }
 /**
- * Read a specified number of bytes from the serial port.
- * @param numBytes number of bytes to read
- * @return buffer of read bytes
- */
-char* SerialPort::read(int numBytes) {
-	char *buffer = new char[numBytes];
-	int numRead = ::read(fileDescriptor, buffer, numBytes);
-	if (numRead < 0) {
-		cerr << "Failed to read data from port.\n";
-		return NULL;
-	}
-	return buffer;
-}
-/**
  * Read an indefinite number of characters from the port.
  * TODO: finish/debug this method
  * @return string containing the entire message
  */
-string SerialPort::read() {
+void SerialPort::read() {
 	string msg = "";
-	char *c = new char;
+	char *currChar = new char;
 	int numRead = 0;
-	while ((numRead = ::read(fileDescriptor, c, 1)) > 0)
-		msg.append(c);
-	return msg;
+	while ((numRead = ::read(fileDescriptor, currChar, 1)) > 0 &&
+		*currChar != '\n')
+		msg.append(currChar);
+	if (msg.length() > 0)
+		cout << msg << endl;
 }
 /**
  * Translate the integer into the corresponding baud rate and
@@ -105,6 +90,7 @@ void SerialPort::setBaudRate(int rate) {
  * @param parity {none, even, odd, space}
  */
 void SerialPort::setParity(Parity parity) {
+	tcgetattr(fileDescriptor, &options);
 	switch (parity) {
 	case none:
 		options.c_cflag &= ~PARENB;
@@ -140,10 +126,23 @@ void SerialPort::setParity(Parity parity) {
  * @param dataBits number of bits as an integer
  */
 void SerialPort::setDataBits(int dataBits) {
+	tcgetattr(fileDescriptor, &options);
 	//TODO: allow for data bit size 5-8
 	options.c_cflag &= ~CSIZE;
 	options.c_cflag |= CS8;
 
+	tcsetattr(fileDescriptor, TCSANOW, &options);
+}
+/**
+ * Turn on/off the software flow control for the port.
+ * @param on bool indicating whether it should be on or not
+ */
+void SerialPort::setFlowControl(bool on) {
+	tcgetattr(fileDescriptor, &options);
+	if (on)
+		options.c_cflag |= (IXON | IXOFF | IXANY);
+	else
+		options.c_cflag &= ~(IXON | IXOFF | IXANY);
 	tcsetattr(fileDescriptor, TCSANOW, &options);
 }
 /**
