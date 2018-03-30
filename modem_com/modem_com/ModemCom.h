@@ -43,14 +43,19 @@ class ModemCom
 {
 private:
 	static const PortSettings SETTINGS;
+	static const int MAX_READ;
+
 	asio::io_service service;
 	SerialPortPointer port;
+	char *msgReceived;
 
 public:
 	ModemCom();
 	~ModemCom();
 
 	bool initPort(std::string portName);
+	void session();
 	void transmit(std::string message);
+	void receive();
 };
 

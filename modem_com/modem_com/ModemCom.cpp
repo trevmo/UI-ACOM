@@ -19,12 +19,15 @@ const PortSettings ModemCom::SETTINGS = {
 	asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none)
 };
 
+const int ModemCom::MAX_READ = 20;
+
 /**
  * Initialize a new instance of ModemCom, particulary its underlying serial port.
  */
 ModemCom::ModemCom()
 {
 	port = SerialPortPointer(new asio::serial_port(service));
+	msgReceived = new char[MAX_READ];
 }
 /**
  * Close the port upon end of use.
@@ -32,6 +35,7 @@ ModemCom::ModemCom()
 ModemCom::~ModemCom()
 {
 	port->close();
+	delete []msgReceived;
 }
 /**
  * Open the specified port and initialize the settings.
@@ -59,6 +63,11 @@ bool ModemCom::initPort(std::string portName)
 	}
 	return false;
 }
+void ModemCom::session()
+{
+	transmit("at");
+	receive();
+}
 /**
  * Send the specified message over the port.
  * @param message AT command
@@ -69,5 +78,14 @@ void ModemCom::transmit(std::string message)
 		return;
 
 	asio::write(*port, asio::buffer(message, message.length()));
+}
+
+void ModemCom::receive()
+{
+	if (port == NULL || !port->is_open())
+		return;
+	int numRead = port->read_some(asio::buffer(msgReceived, MAX_READ));
+	if (numRead > 0)
+		std::cout << msgReceived << std::endl;
 }
 
