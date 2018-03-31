@@ -12,6 +12,7 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <thread>
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio.hpp>
 
@@ -46,8 +47,9 @@ private:
 	static const int MAX_READ;
 
 	asio::io_service service;
-	SerialPortPointer port;
-	char *msgReceived;
+	static SerialPortPointer port;
+	
+	static bool _continue;
 
 public:
 	ModemCom();
@@ -55,7 +57,8 @@ public:
 
 	bool initPort(std::string portName);
 	void session();
-	void transmit(std::string message);
-	void receive();
+	static void transmit();
+	static void send(std::string message);
+	static void receive();
 };
 
