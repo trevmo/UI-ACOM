@@ -80,6 +80,39 @@ void ModemCom::session()
 	transmitThread.join();
 }
 /**
+ * Start an automated session where commands are sent to the modem in
+ * delayed intervals and the responses are stored in a log file.
+ * @param filename path to the log file
+ * @param secondsDelay number of seconds to delay between transmissions
+ */
+void ModemCom::automatedSession(std::string filename, int secondsDelay)
+{
+	std::ofstream *logFile = new std::ofstream;
+	logFile->open(filename, std::fstream::out);
+
+	std::thread receiveThread(ModemCom::receive);
+	if (logFile->is_open())
+	{
+		//save the read buffer for restoration later
+		std::streambuf *coutBuf = std::cout.rdbuf();
+		//redirect cout to the logFile
+		std::cout.rdbuf(logFile->rdbuf());
+
+		receiveThread.detach();
+		//TODO: adapt to send commands for test launch at larger interval
+		for (int i = 0; i < 5; i++)
+		{
+			std::cout << "Sent: at\n";
+			send("at");
+			std::this_thread::sleep_for(std::chrono::seconds(secondsDelay));
+		}
+		//signal the read thread to stop running
+		_continue = false;
+		std::cout.rdbuf(coutBuf);
+		logFile->close();
+	}
+}
+/**
  * Accept input from the user and send the command to the modem.
  * Note: This method is static and designed to be run in its own thread.
  */

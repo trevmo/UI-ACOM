@@ -12,7 +12,7 @@ int main()
 	ModemCom controller;
 	bool success = controller.initPort("/dev/ttyUSB0");
 	if (success)
-		controller.session();
+		controller.automatedSession("/home/acom/logging/log.txt", 3);
 	
 	return 0;
 }

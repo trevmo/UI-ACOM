@@ -13,6 +13,8 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include <fstream>
+#include <chrono>
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio.hpp>
 
@@ -48,8 +50,12 @@ private:
 
 	asio::io_service service;
 	static SerialPortPointer port;
-	
+
 	static bool _continue;
+
+	static void transmit();
+	static void send(std::string message);
+	static void receive();
 
 public:
 	ModemCom();
@@ -57,8 +63,6 @@ public:
 
 	bool initPort(std::string portName);
 	void session();
-	static void transmit();
-	static void send(std::string message);
-	static void receive();
+	void automatedSession(std::string filename, int secondsDelay);
 };
 
