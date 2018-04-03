@@ -22,7 +22,7 @@ const PortSettings ModemCom::SETTINGS = {
 /**
  * Declare the static members of the class.
  */
-const int ModemCom::MAX_READ = 20;
+const int ModemCom::MAX_READ = 128;
 SerialPortPointer ModemCom::port;
 bool ModemCom::_continue;
 
@@ -108,12 +108,14 @@ void ModemCom::send(std::string message)
 	if (port == NULL || !port->is_open())
 		return;
 
+	//IMPORTANT: be sure to append a carriage return to the command before sending
+	//to ensure that the full response is received from the modem
+	message.append("\r");
 	asio::write(*port, asio::buffer(message, message.length()));
 }
 /**
  * Continually try to receive responses from the modem through the port.
  * Note: This method is static and designed to be run in its own thread.
- * TODO: debug why only the first line of the response is received and not the rest.
  */
 void ModemCom::receive()
 {
@@ -127,7 +129,8 @@ void ModemCom::receive()
 			char *msgReceived = new char[MAX_READ];
 			int numRead = port->read_some(asio::buffer(msgReceived, MAX_READ));
 			if (numRead > 0)
-				std::cout << "\t" << msgReceived << std::endl;
+				for (int i = 0; i < numRead; i++)
+					std::cout << msgReceived[i];
 			delete[] msgReceived;
 		}
 		catch (const std::exception& e)
