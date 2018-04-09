@@ -12,6 +12,7 @@
 
 #pragma once
 #include "PortCom.h"
+#include "GPSReader.h"
 
 using namespace boost;
 
@@ -19,18 +20,26 @@ using namespace boost;
  * ModemCom is designed for enabling communications with an Iridium modem over
  * an RS232 serial port. The modem expects and responds to AT commands.
  */
-class ModemCom : public PortCom
+class ModemCom : 
+	public PortCom
 {
 private:
-	static const PortSettings SETTINGS;
+	// Since ModemCom's transmit/receive methods are used as separate threads, ModemCom
+	// needs a separate static reference to the underlying port from PortCom. If you
+	// set the port in PortCom to be static, then all derived classes will share the same
+	// static instance at runtime.
+	static SerialPortPointer modemPort;
+	GPSReader gpsReader;
 
 	static void transmit();
 	static void send(std::string message);
 	static void receive();
 
 public:
-	ModemCom() {}
-	~ModemCom() {}
+	static const PortSettings SETTINGS;
+
+	ModemCom();
+	~ModemCom();
 
 	void session();
 	void automatedSession(std::string filename, int secondsDelay);

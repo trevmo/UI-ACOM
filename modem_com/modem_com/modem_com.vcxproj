@@ -61,11 +61,13 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="GPSReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModemCom.cpp" />
     <ClCompile Include="PortCom.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GPSReader.h" />
     <ClInclude Include="ModemCom.h" />
     <ClInclude Include="PortCom.h" />
   </ItemGroup>

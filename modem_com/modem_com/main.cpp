@@ -10,9 +10,10 @@
 int main()
 {
 	ModemCom controller;
-	bool success = controller.initPort("/dev/ttyUSB0");
+	bool success = controller.initPort("/dev/ttyUSB1", ModemCom::SETTINGS);
 	if (success)
 		controller.automatedSession("/home/acom/logging/log.txt", 3);
+		//controller.session();
 	
 	return 0;
 }

@@ -47,17 +47,16 @@ typedef shared_ptr<asio::serial_port> SerialPortPointer;
 class PortCom
 {
 protected:
-	static PortSettings SETTINGS;
 	static const int MAX_READ;
 
 	asio::io_service service;
-	static SerialPortPointer port;
+	SerialPortPointer port;
 
 	static bool _continue;
 public:
 	PortCom();
 	~PortCom();
 
-	bool initPort(std::string portName);
+	bool initPort(std::string portName, PortSettings settings);
 };
 

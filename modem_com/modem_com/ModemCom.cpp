@@ -18,7 +18,23 @@ const PortSettings ModemCom::SETTINGS = {
 	asio::serial_port_base::stop_bits(asio::serial_port_base::stop_bits::one),
 	asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none)
 };
+SerialPortPointer ModemCom::modemPort;
 
+/**
+* Initialize a new instance of PortCom, particularly its instance of a GPSReader.
+*/
+ModemCom::ModemCom()
+{
+	modemPort = PortCom::port;
+	gpsReader.initPort("/dev/ttyUSB0", GPSReader::SETTINGS);
+}
+/**
+* Close the port upon end of use.
+*/
+ModemCom::~ModemCom()
+{
+	port->close();
+}
 /**
  * Start a session allowing a user to interface with the modem by
  * entering commands and receiving its response(s).
@@ -42,6 +58,7 @@ void ModemCom::automatedSession(std::string filename, int secondsDelay)
 	std::ofstream *logFile = new std::ofstream;
 	logFile->open(filename, std::fstream::out);
 
+	std::string gpsInfo = "";
 	std::thread receiveThread(ModemCom::receive);
 	if (logFile->is_open())
 	{
@@ -52,10 +69,12 @@ void ModemCom::automatedSession(std::string filename, int secondsDelay)
 
 		receiveThread.detach();
 		//TODO: adapt to send commands for test launch at larger interval
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 2; i++)
 		{
-			std::cout << "Sent: at\n";
-			send("at");
+			gpsInfo = gpsReader.read();
+			std::cout << "Sent: at+sbdwt=\"" << gpsInfo << "\"" << std::endl;
+			send("at+sbdwt=\"" + gpsInfo + "\"");
+			//send("at+sbdi");
 			std::this_thread::sleep_for(std::chrono::seconds(secondsDelay));
 		}
 		//signal the read thread to stop running
@@ -72,7 +91,7 @@ void ModemCom::transmit()
 {
 	while (_continue)
 	{
-		if (port == NULL || !port->is_open())
+		if (modemPort == NULL || !modemPort->is_open())
 			return;
 
 		std::string command;
@@ -90,13 +109,13 @@ void ModemCom::transmit()
  */
 void ModemCom::send(std::string message)
 {
-	if (port == NULL || !port->is_open())
+	if (modemPort == NULL || !modemPort->is_open())
 		return;
 
 	//IMPORTANT: be sure to append a carriage return to the command before sending
 	//to ensure that the full response is received from the modem
 	message.append("\r");
-	asio::write(*port, asio::buffer(message, message.length()));
+	asio::write(*modemPort, asio::buffer(message, message.length()));
 }
 /**
  * Continually try to receive responses from the modem through the port.
@@ -106,13 +125,13 @@ void ModemCom::receive()
 {
 	while (_continue)
 	{
-		if (port == NULL || !port->is_open())
+		if (modemPort == NULL || !modemPort->is_open())
 			return;
 	
 		try
 		{
 			char *msgReceived = new char[MAX_READ];
-			int numRead = port->read_some(asio::buffer(msgReceived, MAX_READ));
+			int numRead = modemPort->read_some(asio::buffer(msgReceived, MAX_READ));
 			if (numRead > 0)
 				for (int i = 0; i < numRead; i++)
 					std::cout << msgReceived[i];

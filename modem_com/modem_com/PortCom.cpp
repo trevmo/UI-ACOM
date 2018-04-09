@@ -10,8 +10,6 @@
 /**
  * Declare the static members of the class.
  */
-PortSettings PortCom::SETTINGS;
-SerialPortPointer PortCom::port;
 const int PortCom::MAX_READ = 128;
 bool PortCom::_continue;
 
@@ -35,17 +33,17 @@ PortCom::~PortCom()
  * @param portName Linux path to serial port (/dev/tty*)
  * @return if successful, true; otherwise, false
  */
-bool PortCom::initPort(std::string portName)
+bool PortCom::initPort(std::string portName, PortSettings settings)
 {
 	try
 	{
 		port->open(portName.c_str());
 
-		port->set_option(SETTINGS.baudRate);
-		port->set_option(SETTINGS.parity);
-		port->set_option(SETTINGS.dataBits);
-		port->set_option(SETTINGS.stopBits);
-		port->set_option(SETTINGS.flowControl);
+		port->set_option(settings.baudRate);
+		port->set_option(settings.parity);
+		port->set_option(settings.dataBits);
+		port->set_option(settings.stopBits);
+		port->set_option(settings.flowControl);
 
 		return true;
 	}
