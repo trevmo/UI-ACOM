@@ -19,14 +19,16 @@ const PortSettings ModemCom::SETTINGS = {
 	asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none)
 };
 SerialPortPointer ModemCom::modemPort;
+const std::string ModemCom::PORT_NAME = "/dev/ttyUSB1";
 
 /**
 * Initialize a new instance of PortCom, particularly its instance of a GPSReader.
 */
 ModemCom::ModemCom()
 {
+	// store a static reference to the underlying port for multi-threading use
 	modemPort = PortCom::port;
-	gpsReader.initPort("/dev/ttyUSB0", GPSReader::SETTINGS);
+	gpsReader.initPort(GPSReader::PORT_NAME, GPSReader::SETTINGS);
 }
 /**
 * Close the port upon end of use.

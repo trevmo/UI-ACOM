@@ -37,6 +37,7 @@ private:
 
 public:
 	static const PortSettings SETTINGS;
+	static const std::string PORT_NAME;
 
 	ModemCom();
 	~ModemCom();
