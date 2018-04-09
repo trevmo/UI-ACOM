@@ -63,9 +63,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModemCom.cpp" />
+    <ClCompile Include="PortCom.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModemCom.h" />
+    <ClInclude Include="PortCom.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
