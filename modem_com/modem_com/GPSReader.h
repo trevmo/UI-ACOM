@@ -32,8 +32,8 @@ class GPSReader :
 	public PortCom
 {
 public:
+	static std::string PORT_NAME;
 	static const PortSettings SETTINGS;
-	static const std::string PORT_NAME;
 
 	GPSReader() { }
 	~GPSReader();

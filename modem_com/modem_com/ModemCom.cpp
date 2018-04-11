@@ -19,7 +19,11 @@ const PortSettings ModemCom::SETTINGS = {
 	asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none)
 };
 SerialPortPointer ModemCom::modemPort;
-const std::string ModemCom::PORT_NAME = "/dev/ttyUSB1";
+// Set symlink: hintshop.ludvig.co.nz/show/persistent-names-usb-serial-devices/
+std::string ModemCom::PORT_NAME = "/dev/IR9523";
+bool ModemCom::sendingSbd;
+bool ModemCom::sbdSuccess;
+const std::string ModemCom::SBD_RESPONSE = "+SBDI:";
 
 /**
 * Initialize a new instance of PortCom, particularly its instance of a GPSReader.
@@ -29,6 +33,9 @@ ModemCom::ModemCom()
 	// store a static reference to the underlying port for multi-threading use
 	modemPort = PortCom::port;
 	gpsReader.initPort(GPSReader::PORT_NAME, GPSReader::SETTINGS);
+	
+	sendingSbd = false;
+	sbdSuccess = false;
 }
 /**
 * Close the port upon end of use.
@@ -53,12 +60,11 @@ void ModemCom::session()
  * Start an automated session where commands are sent to the modem in
  * delayed intervals and the responses are stored in a log file.
  * @param filename path to the log file
- * @param secondsDelay number of seconds to delay between transmissions
  */
-void ModemCom::automatedSession(std::string filename, int secondsDelay)
+void ModemCom::automatedSession(std::string filename)
 {
 	std::ofstream *logFile = new std::ofstream;
-	logFile->open(filename, std::fstream::out);
+	logFile->open(filename, std::fstream::app);
 
 	std::string gpsInfo = "";
 	std::thread receiveThread(ModemCom::receive);
@@ -70,14 +76,22 @@ void ModemCom::automatedSession(std::string filename, int secondsDelay)
 		std::cout.rdbuf(logFile->rdbuf());
 
 		receiveThread.detach();
-		//TODO: adapt to send commands for test launch at larger interval
-		for (int i = 0; i < 2; i++)
+
+		auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		std::cout << "Time: " << std::ctime(&time);
+
+		gpsInfo = gpsReader.read();
+		std::cout << "Sent: at+sbdwt=\"" << gpsInfo << "\"" << std::endl;
+		send("at+sbdwt=\"" + gpsInfo + "\"");
+		//continue sending sbdi command until the modem responds
+		//for some reason, this command needs to be spammed as the modem does not respond right away
+		while (!sbdSuccess)
 		{
-			gpsInfo = gpsReader.read();
-			std::cout << "Sent: at+sbdwt=\"" << gpsInfo << "\"" << std::endl;
-			send("at+sbdwt=\"" + gpsInfo + "\"");
-			//send("at+sbdi");
-			std::this_thread::sleep_for(std::chrono::seconds(secondsDelay));
+			sbdSuccess = false;
+			sendingSbd = true;
+			std::this_thread::sleep_for(std::chrono::seconds(5));
+			std::cout << "Sent: at+sbdi" << std::endl;
+			send("at+sbdi");				
 		}
 		//signal the read thread to stop running
 		_continue = false;
@@ -125,6 +139,8 @@ void ModemCom::send(std::string message)
  */
 void ModemCom::receive()
 {
+	std::string message = "";
+	bool allReceived = false;
 	while (_continue)
 	{
 		if (modemPort == NULL || !modemPort->is_open())
@@ -132,12 +148,27 @@ void ModemCom::receive()
 	
 		try
 		{
-			char *msgReceived = new char[MAX_READ];
-			int numRead = modemPort->read_some(asio::buffer(msgReceived, MAX_READ));
+			char currChar;
+			int numRead = modemPort->read_some(asio::buffer(&currChar, 1));
 			if (numRead > 0)
-				for (int i = 0; i < numRead; i++)
-					std::cout << msgReceived[i];
-			delete[] msgReceived;
+			{
+				if (currChar == '\r')
+					allReceived = true;
+				else
+					message += currChar;
+				// Print out the response message line-by-line
+				if (allReceived)
+				{
+					// If this is an automated session sending SBD messages,
+					// check if the modem has responded that the SBD message was
+					// sent successfully or not.
+					if (sendingSbd && message.find(SBD_RESPONSE) != std::string::npos)
+						sbdSuccess = true;
+					std::cout << message << std::endl;
+					message.clear();
+					allReceived = false;
+				}
+			}
 		}
 		catch (const std::exception& e)
 		{

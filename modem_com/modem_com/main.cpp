@@ -12,8 +12,7 @@ int main()
 	ModemCom controller;
 	bool success = controller.initPort(ModemCom::PORT_NAME, ModemCom::SETTINGS);
 	if (success)
-		controller.automatedSession("/home/acom/logging/log.txt", 3);
-		//controller.session();
+		controller.automatedSession("/home/acom/logging/log.txt");
 	
 	return 0;
 }

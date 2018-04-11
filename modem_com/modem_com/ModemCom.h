@@ -31,18 +31,22 @@ private:
 	static SerialPortPointer modemPort;
 	GPSReader gpsReader;
 
+	static bool sendingSbd;
+	static bool sbdSuccess;
+
 	static void transmit();
 	static void send(std::string message);
 	static void receive();
 
 public:
+	static std::string PORT_NAME;
 	static const PortSettings SETTINGS;
-	static const std::string PORT_NAME;
+	static const std::string SBD_RESPONSE;
 
 	ModemCom();
 	~ModemCom();
 
 	void session();
-	void automatedSession(std::string filename, int secondsDelay);
+	void automatedSession(std::string filename);
 };
 

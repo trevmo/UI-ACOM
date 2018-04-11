@@ -18,7 +18,8 @@ const PortSettings GPSReader::SETTINGS = {
 	asio::serial_port_base::stop_bits(asio::serial_port_base::stop_bits::one),
 	asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none)
 };
-const std::string GPSReader::PORT_NAME = "/dev/ttyUSB0";
+// Set symlink: hintshop.ludvig.co.nz/show/persistent-names-usb-serial-devices/
+std::string GPSReader::PORT_NAME = "/dev/GPS";
 
 /**
 * Close the port upon end of use.
