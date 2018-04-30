@@ -1,0 +1,11 @@
+[Unit]
+Description=Run modem communications app as service.
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=300 # every 5 minutes
+ExecStart=/home/acom/modem_script # bash script that simply executes modem com app
+
+[Install]
+WantedBy=multi-user.target
