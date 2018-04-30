@@ -19,7 +19,11 @@ Setup:
 - Add additiona linker options:
     - Project Properties -> Linker -> Command Line -> Additional Options -> -lboost_system -lpthread
 ### ArchLinux Service
-> TODO: add udev rule and service information
+Instead of structuring the app to have built-in pauses, it instead is structured for a single-pass with the restarts handled by ArchLinux's service system. In order to setup the app as a service, you must:
+- Create a service file, stored in /etc/systemd/system/modem_com.service. (See *modem_com.service*)
+- Run ```sudo systemctl enable modem_com.service```
+### udev Rules
+Since this app relies on mutliple devices and the Raspberry Pi does not always connect these devices to the same ports, it is necessary to define udev rules that create a symlink for each device based off of their serial numbers and product id's. To enable a rule for this project, copy *99-usb-serial.rules* into /etc/udev/rules.d/ on your Raspberry Pi. (Be sure to double-check the serial numbers and product info if you do not use the same devices as listed.)
 
 ## Classes
 ### PortCom
