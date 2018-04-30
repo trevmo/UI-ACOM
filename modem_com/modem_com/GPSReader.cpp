@@ -61,6 +61,14 @@ std::string GPSReader::read()
 					message += c;
 				if (allReceived)
 				{
+					// On the chance that this method is called part way through the GPS
+					// sending a response and only captures a portion of it, recall the method.
+					// Each GGA sentence begins with a $.
+					if (message[0] != '$')
+					{
+						std::cout << "Retrying GPS read...\n";
+						return read();
+					}
 					boost::split(nmeaValues, message, [](char c) { return c == ','; });
 					return nmeaValues[latIndex] + nmeaValues[latIndex+1] + 
 						"," + 

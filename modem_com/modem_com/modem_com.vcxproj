@@ -71,6 +71,9 @@
     <ClInclude Include="ModemCom.h" />
     <ClInclude Include="PortCom.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
       <AdditionalIncludeDirectories>C:\boost_1_62_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
