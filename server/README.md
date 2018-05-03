@@ -1,4 +1,4 @@
-# UI-ACOM
+# Server
 ## Summary
 This program is designed to run as a client server setup on the Raspberry Pi and a AWS server instance. This program is a dummy example to make a connection using TCP sockets. It transfers a message and echos it back between the client and server.
 
