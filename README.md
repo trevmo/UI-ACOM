@@ -20,7 +20,7 @@ The project goals were three-fold:
 ### modem-com
 This project is an app designed for running on ArchLinux on a Raspberry Pi. It handles serial communications between the Pi, an Iridium 9523 (in an NAL A3LA-RS), and a GPS receiver (GlobalSat BU-353S4). See the project's README for more info.
 ### server
-> TODO: add code and brief summary
+This program is designed to run as a client server setup on the Raspberry Pi and a server. The server is running an instance on Amazon’s AWS EC2 service running Apache.
 ### xbee
 > TODO: add code and brief summary
 
