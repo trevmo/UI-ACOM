@@ -22,7 +22,7 @@ This project is an app designed for running on ArchLinux on a Raspberry Pi. It h
 ### server
 This program is designed to run as a client server setup on the Raspberry Pi and a server. The server is running an instance on Amazon’s AWS EC2 service running Apache.
 ### xbee
-> TODO: add code and brief summary
+This is a standalone program that focuses on sending and recieving data through the main UART on the Raspberry Pi in order to communicate with the Xbee module. See the project's README for more info.
 
 ## Acknowledgements
 The following people and organizations provided support for this project:
